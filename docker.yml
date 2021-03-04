@@ -1,0 +1,45 @@
+---
+- name: "Installing docker and httpd"
+  become: true
+  hosts: all
+  tasks:
+
+
+    - name: Install docker and PIP
+      yum:
+        name:
+          - python-pip
+    - command: amazon-linux-extras install docker -y
+
+    - name: Starting Docker Service
+      service:
+        name: docker
+        state: restarted
+        enabled: true
+
+
+    - name: Install Docker Python Library
+      pip:
+        name: 
+          - docker-py
+
+
+    - name: pull an image
+      docker_image:
+        name: httpd:2.2
+  
+
+    - name: Creating Docker Container
+      docker_container:
+        name: mywebserver
+        image: httpd:2.2
+        state: started
+        detach: true
+        interactive: true
+        ports:
+        - "80:80"
+
+    - name: Copying Website Content
+      copy:
+        src: ./website/
+        dest: /var/www/html/
